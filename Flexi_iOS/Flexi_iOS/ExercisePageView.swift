@@ -16,34 +16,72 @@ struct ExercisePageView: View {
             "Exhale as you push upward from the bottom position, pushing the knees outward.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Standing Calf Raise", imageName: "calf_raise", category: "Legs", description_image: "some_des_image", instructions: [
-            "Stand with feet shoulder-width apart.",
-            "Raise your heels off the ground as high as possible while keeping your legs straight.",
-            "Hold briefly at the top and lower down in a controlled manner.",
+        Exercise(name: "Deadlift", imageName: "deadlift_d", category: "Back", description_image: "deficit", instructions: [
+            "Stand with your feet hip-width apart and the barbell on the ground in front of you.",
+            "Bend your knees slightly and hinge at the hips, lowering your torso to grasp the bar with both hands.",
+            "Keep your back straight as you push through your heels and stand up, pulling the barbell close to your shins.",
+            "Inhale as you lower the bar back to the ground, bending at the hips and knees.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Bicep Curl", imageName: "bicep_curl", category: "Arms",description_image: "some_des_image", instructions: [
-            "Hold the weights with your palms facing up.",
-            "Curl the weights up to your shoulders while keeping your elbows stationary.",
-            "Slowly lower the weights back down to the starting position.",
+        Exercise(name: "Deficit Deadlift", imageName: "deficit_bar", category: "Back",description_image: "deficit", instructions: [
+            "Stand on a platform or elevated surface (about 1-2 inches) with your feet hip-width apart and the barbell on the ground in front of you.",
+            "Bend your knees slightly and hinge at the hips to grip the bar with both hands, ensuring your back remains straight.",
+            "Push through your heels to lift the bar off the ground, extending your hips and knees as you stand upright.",
+            "Keep the bar close to your body, engaging your core and back throughout the movement.",
+            "Inhale as you lower the bar back to the ground, bending at the hips and knees, returning to the starting position.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Tricep Dips", imageName: "tricep_dip", category: "Arms", description_image: "some_des_image", instructions: [
-            "Position your hands shoulder-width apart on a secured bench or chair.",
-            "Lower your body by bending your elbows, keeping them close to your body.",
-            "Push yourself back up to the starting position.",
+        Exercise(name: "Front Squat", imageName: "front_bar", category: "Arms", description_image: "front_squat", instructions: [
+            "Stand with your feet shoulder-width apart, holding a barbell across the front of your shoulders with your elbows high and chest up.",
+            "Sit back with your hips while keeping your chest upright, lowering your body until your thighs are parallel to the floor.",
+            "Keep your knees tracking over your toes, and maintain a neutral spine throughout the movement.",
+            "Push through your heels to return to the starting position, keeping your core tight.",
+            "Exhale as you stand, inhale as you lower into the squat.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Pull-Ups", imageName: "pullup", category: "Back", description_image: "some_des_image", instructions: [
-            "Grab the pull-up bar with your palms facing away from you.",
-            "Pull your body up until your chin clears the bar.",
-            "Lower yourself back down in a controlled manner.",
+        Exercise(name: "Hip Thrust", imageName: "hip_bar", category: "Back", description_image: "hip", instructions: [
+            "Sit on the floor with your upper back resting against a bench and your feet flat on the floor, hip-width apart.",
+            "Roll a barbell over your hips, positioning it just above your pelvis, and brace your core.",
+            "Drive through your heels to lift your hips up, extending them until your body forms a straight line from shoulders to knees.",
+            "Squeeze your glutes at the top, then slowly lower your hips back to the floor.",
+            "Exhale as you lift, inhale as you lower down.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Deadlift", imageName: "deadlift", category: "Back", description_image: "some_des_image", instructions: [
-            "Stand with your feet shoulder-width apart and grip the barbell just outside your knees.",
-            "Lift the bar by extending your hips and knees until you're standing tall.",
-            "Lower the bar back down to the ground by bending your hips and knees.",
+        Exercise(name: "Kneeling Hip Thrust", imageName: "kneeling_b", category: "Back", description_image: "kneeling", instructions: [
+            "Start in a kneeling position on a mat, with your upper body upright and hands on your hips or holding a weight at your chest.",
+            "Push your hips back, lowering your glutes towards your heels while keeping your upper body straight.",
+            "Drive your hips forward by squeezing your glutes and return to the upright kneeling position.",
+            "Inhale as you lower your hips, exhale as you thrust forward.",
+            "Repeat for reps."
+        ]),
+        Exercise(name: "Leg Press", imageName: "press_bar", category: "Back", description_image: "some_des_image", instructions: [
+            "Sit on the leg press machine with your back flat against the seat and feet placed shoulder-width apart on the platform.",
+            "Push through your heels to extend your legs, without locking your knees at the top of the movement.",
+            "Lower the platform slowly by bending your knees, keeping them aligned with your toes.",
+            "Inhale as you lower, exhale as you push the platform back up.",
+            "Repeat for reps."
+        ]),
+        Exercise(name: "Lunge", imageName: "lunge_d", category: "Back", description_image: "some_des_image", instructions: [
+            "Stand tall with feet hip-width apart and take a step forward with one leg.",
+            "Lower your body until both knees are bent at 90 degrees, keeping your front knee above your ankle and your back knee hovering just above the ground.",
+            "Push through the heel of your front foot to return to the starting position.",
+            "Switch legs and repeat the movement.",
+            "Inhale as you lower into the lunge, exhale as you push back up.",
+            "Repeat for reps on each leg."
+        ]),
+        Exercise(name: "Squat(Dumbbell)", imageName: "squat_d", category: "Back", description_image: "some_des_image", instructions: [
+            "Stand with feet shoulder-width apart, holding a dumbbell in each hand at your sides or one dumbbell in front of your chest.",
+            "Sit back with your hips as you lower your body, keeping your chest upright and your back straight.",
+            "Lower until your thighs are parallel to the floor, keeping your knees aligned with your toes.",
+            "Push through your heels to return to the starting position.",
+            "Inhale as you lower into the squat, exhale as you stand back up.",
+            "Repeat for reps."
+        ]),
+        Exercise(name: "Standing Calf Raise", imageName: "standing_b", category: "Back", description_image: "standing", instructions: [
+            "Stand on a flat surface with your feet shoulder-width apart, or on the edge of a step for an extended range of motion.",
+            "Push through the balls of your feet to raise your heels as high as possible, squeezing your calves at the top.",
+            "Slowly lower your heels back down to the ground.",
+            "Exhale as you lift, inhale as you lower.",
             "Repeat for reps."
         ]),
         // Add more exercises as needed...
@@ -188,25 +226,29 @@ struct ExerciseDescriptionView: View {
 //                    .frame(width: 100, height: 100)
             }
             
-            // Instructions
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Instructions:")
-                    .font(.headline)
-                    .padding(.top)
-                
-                ForEach(exercise.instructions, id: \.self) { instruction in
-                    HStack(alignment: .top) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.yellow)
-                        Text(instruction)
-                            .padding(.leading, 5)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Instructions:")
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    ForEach(exercise.instructions, id: \.self) { instruction in
+                        HStack(alignment: .top) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.yellow)
+                            Text(instruction)
+                                .padding(.leading, 5)
+                        }
+                        .padding(.vertical, 5)
                     }
-                    .padding(.vertical, 5)
                 }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
-            
+
             Spacer()
+
+            
+       
 
             // Start Button
             Button(action: {
