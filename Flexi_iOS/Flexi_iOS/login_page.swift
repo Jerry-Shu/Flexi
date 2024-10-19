@@ -1,18 +1,20 @@
 import SwiftUI
 
 struct LoginView: View {
+    @State private var showHomeView = false  // State to show the HomeView
+
     var body: some View {
         VStack {
             Spacer()
-            
+
             // Logo Image
-            Image("logo") // Replace "logo" with the name of your actual logo image in the asset catalog
+            Image("logo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 300, height: 300)
                 .padding(.top, 20)
                 .padding(.bottom, -50)
-            
+
             // Email TextField
             TextField("Email", text: .constant(""))
                 .padding()
@@ -20,7 +22,7 @@ struct LoginView: View {
                 .cornerRadius(20)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 15)
-            
+
             // Password TextField
             SecureField("Password", text: .constant(""))
                 .padding()
@@ -28,10 +30,10 @@ struct LoginView: View {
                 .cornerRadius(20)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 30)
-            
+
             // Sign In Button
             Button(action: {
-                // Action for sign in
+                showHomeView = true  // Set the state to true to present HomeView
             }) {
                 Text("Sign In")
                     .font(.headline)
@@ -43,7 +45,12 @@ struct LoginView: View {
             }
             .padding(.horizontal, 40)
             .padding(.bottom, 20)
-            
+
+            // Use fullScreenCover to present HomeView modally
+            .fullScreenCover(isPresented: $showHomeView) {
+                HomeView()
+            }
+
             // Sign Up Link
             HStack {
                 Text("Don't have an account?")
@@ -56,12 +63,15 @@ struct LoginView: View {
                         .foregroundColor(.orange)
                 }
             }
+
             Spacer()
         }
         .background(Color.yellow)
         .edgesIgnoringSafeArea(.all)
     }
 }
+
+
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
