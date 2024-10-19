@@ -10,37 +10,37 @@ struct ExercisePageView: View {
     
     // Example exercises categorized by body part
     let exercises = [
-        Exercise(name: "Squat", imageName: "squat_b", category: "Legs", instructions: [
+        Exercise(name: "Squat", imageName: "squat_b", category: "Legs", description_image: "detail_squat", instructions: [
             "Standing with feet shoulder-width apart, sit back with the hips while flexing hips and keeping knees pointed slightly outward.",
             "Continue down to the bottom position, while making sure you are maintaining a straight back and keeping weight evenly distributed throughout the foot.",
             "Exhale as you push upward from the bottom position, pushing the knees outward.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Standing Calf Raise", imageName: "calf_raise", category: "Legs", instructions: [
+        Exercise(name: "Standing Calf Raise", imageName: "calf_raise", category: "Legs", description_image: "some_des_image", instructions: [
             "Stand with feet shoulder-width apart.",
             "Raise your heels off the ground as high as possible while keeping your legs straight.",
             "Hold briefly at the top and lower down in a controlled manner.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Bicep Curl", imageName: "bicep_curl", category: "Arms", instructions: [
+        Exercise(name: "Bicep Curl", imageName: "bicep_curl", category: "Arms",description_image: "some_des_image", instructions: [
             "Hold the weights with your palms facing up.",
             "Curl the weights up to your shoulders while keeping your elbows stationary.",
             "Slowly lower the weights back down to the starting position.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Tricep Dips", imageName: "tricep_dip", category: "Arms", instructions: [
+        Exercise(name: "Tricep Dips", imageName: "tricep_dip", category: "Arms", description_image: "some_des_image", instructions: [
             "Position your hands shoulder-width apart on a secured bench or chair.",
             "Lower your body by bending your elbows, keeping them close to your body.",
             "Push yourself back up to the starting position.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Pull-Ups", imageName: "pullup", category: "Back", instructions: [
+        Exercise(name: "Pull-Ups", imageName: "pullup", category: "Back", description_image: "some_des_image", instructions: [
             "Grab the pull-up bar with your palms facing away from you.",
             "Pull your body up until your chin clears the bar.",
             "Lower yourself back down in a controlled manner.",
             "Repeat for reps."
         ]),
-        Exercise(name: "Deadlift", imageName: "deadlift", category: "Back", instructions: [
+        Exercise(name: "Deadlift", imageName: "deadlift", category: "Back", description_image: "some_des_image", instructions: [
             "Stand with your feet shoulder-width apart and grip the barbell just outside your knees.",
             "Lift the bar by extending your hips and knees until you're standing tall.",
             "Lower the bar back down to the ground by bending your hips and knees.",
@@ -150,6 +150,7 @@ struct Exercise: Identifiable {
     let name: String
     let imageName: String
     let category: String
+    let description_image:String
     let instructions: [String]
 }
 
@@ -177,14 +178,14 @@ struct ExerciseDescriptionView: View {
             
             // Exercise Images
             HStack(spacing: 30) {
-                Image(systemName: "figure.walk")  // Replace with your exercise images
+                Image(exercise.description_image)  // Replace with your exercise images
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 100, height: 100)
-                Image(systemName: "figure.walk")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 100, height: 100)
+                    .frame(width: 200, height: 200)
+//                Image(systemName: "figure.walk")
+//                    .resizable()
+//                    .scaledToFit()
+//                    .frame(width: 100, height: 100)
             }
             
             // Instructions
