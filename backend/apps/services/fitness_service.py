@@ -26,7 +26,7 @@ load_dotenv()
 class FitnessService:
     def __init__(self):
         # Create a Bedrock Runtime client in the AWS Region of your choice.
-        self.model_id = "gemini-1.5-pro-latest"
+        self.model_id = "gemini-1.5-flash"
         self.response_format = {
             "rating": 80,
             "overall_evaluation": ["point1", "point2", "..."],
@@ -45,7 +45,7 @@ class FitnessService:
         webp_path = make_image_path(input_path)
         print("webp_path", webp_path)
 
-        video_to_webp(input_path, webp_path)
+        # video_to_webp(input_path, webp_path)
 
         gemini_file = genai.upload_file(path=webp_path, display_name="webp")
         file = genai.get_file(name=gemini_file.name)
