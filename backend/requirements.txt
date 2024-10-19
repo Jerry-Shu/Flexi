@@ -1,0 +1,4 @@
+chromadb
+torch
+transformers
+pillow
