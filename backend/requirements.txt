@@ -2,3 +2,8 @@ chromadb
 torch
 transformers
 pillow
+uagents
+google-generativeai
+opencv-python
+flask
+flask_cors

@@ -7,7 +7,7 @@ from . import DATABASE_PATH
 
 
 class Knowledge(ABC):
-    def __init__(self, source_type, source_path):
+    def __init__(self, source_type, source_path=""):
         self.source_type = source_type
         self.source_path = source_path
         self.chroma_client = chromadb.PersistentClient(path=DATABASE_PATH)

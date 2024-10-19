@@ -2,7 +2,7 @@
 from .knowledge import Knowledge
 
 class LocalFileKnowledge(Knowledge):
-    def __init__(self, src_type, src_path):
+    def __init__(self, src_type, src_path=""):
         super().__init__(src_type, src_path)
 
     def build_knowledge(self):
