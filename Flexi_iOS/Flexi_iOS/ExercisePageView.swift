@@ -10,7 +10,7 @@ struct ExercisePageView: View {
     
     // Example exercises categorized by body part
     let exercises = [
-        Exercise(name: "Squat", imageName: "squat", category: "Legs", instructions: [
+        Exercise(name: "Squat", imageName: "squat_b", category: "Legs", instructions: [
             "Standing with feet shoulder-width apart, sit back with the hips while flexing hips and keeping knees pointed slightly outward.",
             "Continue down to the bottom position, while making sure you are maintaining a straight back and keeping weight evenly distributed throughout the foot.",
             "Exhale as you push upward from the bottom position, pushing the knees outward.",
@@ -107,7 +107,7 @@ struct ExercisePageView: View {
                                     }
                                 }) {
                                     VStack {
-                                        Image(systemName: "figure.walk")  // Replace with your exercise image
+                                        Image(exercise.imageName)  // Replace with your exercise image
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: 60, height: 60)  // Smaller image size
