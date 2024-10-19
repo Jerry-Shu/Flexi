@@ -78,7 +78,7 @@ struct HomeView: View {
                 HStack {
                     Spacer()
                     // Home Tab
-                    NavigationLink(destination: HomePageView()) {
+                    
                         VStack {
                             Image(systemName: "house")
                                 .foregroundColor(selectedTab == "Home" ? Color.yellow : Color.gray)
@@ -86,9 +86,7 @@ struct HomeView: View {
                                 .font(.caption)
                                 .foregroundColor(selectedTab == "Home" ? Color.yellow : Color.gray)
                         }
-                    }.simultaneousGesture(TapGesture().onEnded{
-                        selectedTab = "Home"
-                    })
+                    
                     Spacer()
                     // Exercise Tab
                     NavigationLink(destination: ExercisePageView()) {
@@ -139,30 +137,17 @@ struct HomeView: View {
     }
 }
 
-// Dummy Views for Navigation
-struct HomePageView: View {
-    var body: some View {
-        Text("Home Page")
-    }
-}
+//// Dummy Views for Navigation
+//struct HomePageView: View {
+//    var body: some View {
+//        Text("Home Page")
+//    }
+//}
+    
 
-struct ExercisePageView: View {
-    var body: some View {
-        Text("Exercise Page")
-    }
-}
 
-struct HistoryPageView: View {
-    var body: some View {
-        Text("History Page")
-    }
-}
 
-struct ProfilePageView: View {
-    var body: some View {
-        Text("Profile Page")
-    }
-}
+
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
