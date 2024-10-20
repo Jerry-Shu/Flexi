@@ -12,13 +12,16 @@ struct ProfilePageView: View {
                     .padding(.horizontal, 20)
                 
                 // Profile Image
-                Image("Profile")
+                Image("profile")
+                    
                     .resizable()
+                    .offset(x:3)
                     .scaledToFit()
                     .clipShape(Circle())
                     .overlay(Circle().stroke(Color.yellow, lineWidth: 4))
                     .frame(width: 120, height: 120)
                     .padding(.top, 20)
+                    
                 
                 // Profile options list
                 VStack(spacing: 0) {
