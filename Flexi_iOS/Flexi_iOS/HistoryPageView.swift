@@ -22,7 +22,6 @@ struct HistoryPageView: View {
                         .padding(.bottom)
                     
                     // History Card
-                    
                     VStack(alignment: .leading) {
                         HStack {
                             Text("Legs Day")
@@ -46,11 +45,11 @@ struct HistoryPageView: View {
                         
                         // Exercise List
                         VStack(alignment: .leading, spacing: 10) {
-                            ExerciseItemView(exerciseName: "Deficit Deadlift", weightAndReps: "50 lbs x 12", imageName: "figure.walk")
+                            ExerciseItemView(exerciseName: "Deficit Deadlift", weightAndReps: "50 lbs x 12", imageName: "deficit_bar")
                             Divider()
-                            ExerciseItemView(exerciseName: "Hip Thrust", weightAndReps: "50 lbs x 12", imageName: "figure.walk")
+                            ExerciseItemView(exerciseName: "Hip Thrust", weightAndReps: "50 lbs x 12", imageName: "hip_bar")
                             Divider()
-                            ExerciseItemView(exerciseName: "Front Squat", weightAndReps: "50 lbs x 12", imageName: "figure.walk")
+                            ExerciseItemView(exerciseName: "Front Squat", weightAndReps: "50 lbs x 12", imageName: "front_bar")
                         }
                     }
                     .padding()
@@ -58,6 +57,7 @@ struct HistoryPageView: View {
                     .cornerRadius(10)
                     .shadow(radius: 5)
                     .padding(.horizontal)
+                    .offset(y: 25)
                     
                     Spacer()
                 }
@@ -76,8 +76,8 @@ struct ExerciseItemView: View {
 
     var body: some View {
         HStack {
-            // Replace with actual images
-            Image(systemName: imageName)
+            // Use the image from the Assets folder
+            Image(imageName)  // No need to use systemName here
                 .resizable()
                 .frame(width: 50, height: 50)
                 .padding(.trailing, 10)

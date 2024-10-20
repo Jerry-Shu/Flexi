@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct EvaluationPageView: View {
+    @State private var isLoading = true  // Add a state to track loading
+    @State private var dataReceived = false  // Track whether data has been received
     @State private var animationProgress: CGFloat = 0.0
     @State private var scoreText = ""
     @State private var totalScoreText = ""
@@ -32,160 +34,193 @@ struct EvaluationPageView: View {
     ]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading) {
-                // Play button at the top
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        // Add functionality here when needed
-                    }) {
-                        Image(systemName: "play.circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.blue)
-                            .padding(.top, 20)
-                            .padding(.trailing, 20)
+        ZStack {
+            if isLoading {
+                // Loading view while data is being fetched
+                LoadingView()
+                    .onAppear {
+                        checkDataStatus()
                     }
-                }
-
-                // Title
-                if !wellDoneText.isEmpty {
-                    Text(wellDoneText)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .padding(.top, 20)
-                        .padding(.horizontal, 20)
-                }
-
-                if showLoadingBar {
-                    Spacer().frame(height: 20)
-
-                    // Score Circle
-                    ZStack {
-                        Circle()
-                            .trim(from: 0.0, to: 1.0)
-                            .stroke(Color.gray.opacity(0.5), style: StrokeStyle(lineWidth: 20, lineCap: .round))
-                            .frame(width: 180, height: 180)
-                            .rotationEffect(.degrees(270))
-
-                        Circle()
-                            .trim(from: 0.0, to: animationProgress)
-                            .stroke(AngularGradient(gradient: Gradient(colors: [Color.yellow]), center: .center), style: StrokeStyle(lineWidth: 20, lineCap: .round))
-                            .frame(width: 180, height: 180)
-                            .rotationEffect(.degrees(270))
-                            .animation(.easeInOut(duration: 2.0), value: animationProgress)
-
-                        VStack {
-                            Image(systemName: "figure.stand")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 60, height: 60)
-                        }
-                    }
-                    .padding(.top, 10)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    // Display Score below the circle
-                    if showScore {
+            } else {
+                // Main evaluation page view
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        // Play button at the top
                         HStack {
-                            Text(scoreText)
-                                .font(.system(size: 50))
-                                .fontWeight(.bold)
-                                .padding(.top, 10) // Space between circle and score
-
-                            Text(totalScoreText)
-                                .font(.title3)
-                                .foregroundColor(.gray)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                }
-
-                if showOverallEvaluation {
-                    Spacer().frame(height: 30)
-
-                    // Overall Evaluation Section
-                    HStack(spacing: 10) {
-                        Image(systemName: "trophy.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.yellow)
-                        Text(overallEvaluationText)
-                            .font(.headline)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.horizontal, 20)
-                    Divider()
-                        .background(Color.yellow)
-                        .padding(.horizontal, 20)
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(0..<evaluationTextIndex, id: \.self) { index in
-                            EvaluationPoint(number: index + 1, text: evaluationTextsArray[index])
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                }
-
-                if showNextLevel {
-                    Spacer().frame(height: 30)
-
-                    // Next Level Section
-                    HStack(spacing: 10) {
-                        Image(systemName: "flame.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30, height: 30)
-                            .foregroundColor(.yellow)
-                        Text(nextLevelText)
-                            .font(.headline)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.horizontal, 20)
-                    Divider()
-                        .background(Color.yellow)
-                        .padding(.horizontal, 20)
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(0..<nextLevelIssueIndex, id: \.self) { index in
-                            IssuePoint(text: nextLevelIssuesArray[index].issue, suggestion: nextLevelIssuesArray[index].suggestion)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                }
-
-                Spacer()
-            }
-            .background(Color.white.edgesIgnoringSafeArea(.all))
-            .onAppear {
-                // Start the sequence
-                typeWriterEffect(for: "Well Done!", target: $wellDoneText, perCharacterDelay: 0.01) {  // Faster
-                    // After 'Well Done!' appears
-                    showLoadingBar = true
-                    withAnimation(.easeInOut(duration: 2.0)) {
-                        animationProgress = 0.65
-                    }
-                    // After loading bar animation completes
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        showScore = true
-                        typeWriterEffect(for: "65", target: $scoreText, perCharacterDelay: 0.01) {  // Faster
-                            typeWriterEffect(for: "/100", target: $totalScoreText, perCharacterDelay: 0.01) {  // Faster
-                                showOverallEvaluation = true
-                                typeWriterEffect(for: "Overall Evaluation", target: $overallEvaluationText, perCharacterDelay: 0.01) {  // Faster
-                                    startEvaluationTextAnimation()
-                                }
+                            Spacer()
+                            Button(action: {
+                                // Add functionality here if needed
+                            }) {
+                                Image(systemName: "play.circle.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50)
+                                    .foregroundColor(.blue)
+                                    .padding(.top, 20)
+                                    .padding(.trailing, 20)
                             }
                         }
+
+                        // Title
+                        if !wellDoneText.isEmpty {
+                            Text(wellDoneText)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .padding(.top, 20)
+                                .padding(.horizontal, 20)
+                        }
+
+                        if showLoadingBar {
+                            Spacer().frame(height: 20)
+
+                            // Score Circle
+                            ZStack {
+                                Circle()
+                                    .trim(from: 0.0, to: 1.0)
+                                    .stroke(Color.gray.opacity(0.5), style: StrokeStyle(lineWidth: 20, lineCap: .round))
+                                    .frame(width: 180, height: 180)
+                                    .rotationEffect(.degrees(270))
+
+                                Circle()
+                                    .trim(from: 0.0, to: animationProgress)
+                                    .stroke(AngularGradient(gradient: Gradient(colors: [Color.yellow]), center: .center), style: StrokeStyle(lineWidth: 20, lineCap: .round))
+                                    .frame(width: 180, height: 180)
+                                    .rotationEffect(.degrees(270))
+                                    .animation(.easeInOut(duration: 2.0), value: animationProgress)
+
+                                VStack {
+                                    Image(systemName: "figure.stand")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 60, height: 60)
+                                }
+                            }
+                            .padding(.top, 10)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            
+                            // Display Score below the circle
+                            if showScore {
+                                HStack {
+                                    Text(scoreText)
+                                        .font(.system(size: 50))
+                                        .fontWeight(.bold)
+                                        .padding(.top, 10) // Space between circle and score
+
+                                    Text(totalScoreText)
+                                        .font(.title3)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                        }
+
+                        if showOverallEvaluation {
+                            Spacer().frame(height: 30)
+
+                            // Overall Evaluation Section
+                            HStack(spacing: 10) {
+                                Image(systemName: "trophy.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 30, height: 30)
+                                    .foregroundColor(.yellow)
+                                Text(overallEvaluationText)
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                            }
+                            .padding(.horizontal, 20)
+                            Divider()
+                                .background(Color.yellow)
+                                .padding(.horizontal, 20)
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                ForEach(0..<evaluationTextIndex, id: \.self) { index in
+                                    EvaluationPoint(number: index + 1, text: evaluationTextsArray[index])
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+
+                        if showNextLevel {
+                            Spacer().frame(height: 30)
+
+                            // Next Level Section
+                            HStack(spacing: 10) {
+                                Image(systemName: "flame.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 30, height: 30)
+                                    .foregroundColor(.yellow)
+                                Text(nextLevelText)
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                            }
+                            .padding(.horizontal, 20)
+                            Divider()
+                                .background(Color.yellow)
+                                .padding(.horizontal, 20)
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                ForEach(0..<nextLevelIssueIndex, id: \.self) { index in
+                                    IssuePoint(text: nextLevelIssuesArray[index].issue, suggestion: nextLevelIssuesArray[index].suggestion)
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+
+                        Spacer()
+                    }
+                    .background(Color.white.edgesIgnoringSafeArea(.all))
+                    .onAppear {
+                        // Start the sequence after data is received
+                        startEvaluationSequence()
                     }
                 }
             }
         }
     }
 
+    // MARK: - Check Data Status
+
+    private func checkDataStatus() {
+        // Simulate checking data from the backend every 1 second
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            if dataReceived {
+                isLoading = false  // Stop loading when data is received
+                timer.invalidate()  // Stop the timer once data is available
+            } else {
+                // Simulate backend data reception (replace this with real data fetching logic)
+                // Here we simulate data reception after 5 seconds for demonstration purposes
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    self.dataReceived = true
+                }
+            }
+        }
+    }
+
     // MARK: - Animation Functions
+
+    private func startEvaluationSequence() {
+        typeWriterEffect(for: "Well Done!", target: $wellDoneText, perCharacterDelay: 0.01) {  // Faster
+            // After 'Well Done!' appears
+            showLoadingBar = true
+            withAnimation(.easeInOut(duration: 2.0)) {
+                animationProgress = 0.65
+            }
+            // After loading bar animation completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                showScore = true
+                typeWriterEffect(for: "65", target: $scoreText, perCharacterDelay: 0.01) {  // Faster
+                    typeWriterEffect(for: "/100", target: $totalScoreText, perCharacterDelay: 0.01) {  // Faster
+                        showOverallEvaluation = true
+                        typeWriterEffect(for: "Overall Evaluation", target: $overallEvaluationText, perCharacterDelay: 0.01) {  // Faster
+                            startEvaluationTextAnimation()
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private func startEvaluationTextAnimation(at index: Int = 0) {
         if index < evaluationTexts.count {

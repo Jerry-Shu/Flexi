@@ -192,10 +192,11 @@ struct Exercise: Identifiable {
     let instructions: [String]
 }
 
-// Description View for the Exercise
+
 struct ExerciseDescriptionView: View {
     let exercise: Exercise
-    
+    @State private var showCamera = false
+
     var body: some View {
         VStack(spacing: 20) {
             HStack {
@@ -204,7 +205,7 @@ struct ExerciseDescriptionView: View {
                     .bold()
                 Spacer()
                 Button(action: {
-                    // Dismiss the modal, potentially using a Binding
+                    // Dismiss the modal
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .resizable()
@@ -213,25 +214,21 @@ struct ExerciseDescriptionView: View {
                 }
             }
             .padding()
-            
+
             // Exercise Images
             HStack(spacing: 30) {
-                Image(exercise.description_image)  // Replace with your exercise images
+                Image(exercise.description_image)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 200, height: 200)
-//                Image(systemName: "figure.walk")
-//                    .resizable()
-//                    .scaledToFit()
-//                    .frame(width: 100, height: 100)
             }
-            
+
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Instructions:")
                         .font(.headline)
                         .padding(.top)
-                    
+
                     ForEach(exercise.instructions, id: \.self) { instruction in
                         HStack(alignment: .top) {
                             Image(systemName: "checkmark.circle.fill")
@@ -247,12 +244,9 @@ struct ExerciseDescriptionView: View {
 
             Spacer()
 
-            
-       
-
             // Start Button
             Button(action: {
-                // Start the exercise or dismiss
+                self.showCamera = true
             }) {
                 Text("Start")
                     .font(.headline)
@@ -263,10 +257,56 @@ struct ExerciseDescriptionView: View {
                     .cornerRadius(20)
                     .padding(.horizontal, 20)
             }
-            .padding(.bottom, 30)  // Ensure there's enough padding at the bottom
+            .padding(.bottom, 30)
+            .sheet(isPresented: $showCamera) {
+                CameraView { videoURL in
+                    uploadVideoToServer(videoURL: videoURL)
+                }
+            }
         }
         .padding()
-        .frame(maxHeight: .infinity)  // Ensure the modal takes the full available height
+        .frame(maxHeight: .infinity)
+    }
+
+    func uploadVideoToServer(videoURL: URL) {
+        // Upload video to server
+        let serverURL = URL(string: "https://yourserver.com/upload")! // Replace with your server URL
+        var request = URLRequest(url: serverURL)
+        request.httpMethod = "POST"
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var data = Data()
+
+        // Append the video data
+        let filename = videoURL.lastPathComponent
+        let mimetype = "video/quicktime"
+        let videoData = try! Data(contentsOf: videoURL)
+
+        data.append("--\(boundary)\r\n".data(using: .utf8)!)
+        data.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+        data.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
+        data.append(videoData)
+        data.append("\r\n".data(using: .utf8)!)
+
+        data.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        let session = URLSession.shared
+        session.uploadTask(with: request, from: data) { responseData, response, error in
+            if let error = error {
+                print("Upload error: \(error.localizedDescription)")
+                return
+            }
+
+            if let response = response as? HTTPURLResponse {
+                print("Status code: \(response.statusCode)")
+            }
+
+            if let responseData = responseData {
+                let responseString = String(data: responseData, encoding: .utf8)
+                print("Response data: \(responseString ?? "No response data")")
+            }
+        }.resume()
     }
 }
 
