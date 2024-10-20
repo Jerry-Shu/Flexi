@@ -1,6 +1,9 @@
 import SwiftUI
 
+
 struct EvaluationPageView: View {
+    let evaluationData: EvaluationData
+
     @State private var isLoading = true
     @State private var dataReceived = false
     @State private var animationProgress: CGFloat = 0.0
@@ -8,8 +11,8 @@ struct EvaluationPageView: View {
     @State private var totalScoreText = ""
     @State private var overallEvaluationText = ""
     @State private var nextLevelText = ""
-    @State private var evaluationTextsArray = ["", "", "", ""]
-    @State private var nextLevelIssuesArray = [(issue: String, suggestion: String)](repeating: ("", ""), count: 4)
+    @State private var evaluationTextsArray = [""]
+    @State private var nextLevelIssuesArray = [(issue: String, suggestion: String)]()
     @State private var wellDoneText = ""
     @State private var showLoadingBar = false
     @State private var showScore = false
@@ -18,31 +21,15 @@ struct EvaluationPageView: View {
     @State private var showNextLevel = false
     @State private var evaluationTextIndex = 0
     @State private var nextLevelIssueIndex = 0
-
-    let evaluationTexts = [
-        "The individual is attempting a deadlift movement with a specialized barbell.",
-        "The grip on the barbell appears correct, with hands placed outside the legs.",
-        "The stance width seems appropriate for a conventional deadlift.",
-        "There are significant form issues that need to be addressed for safety and effectiveness."
-    ]
-
-    let nextLevelIssues = [
-        ("Rounded back", "Suggestion: Keep your back straight by engaging your core and lats."),
-        ("Improper hip hinge", "Suggestion: Practice hinging at the hips while keeping your back neutral."),
-        ("Lack of core engagement", "Suggestion: Brace your core before initiating the lift."),
-        ("Barbell too far from body", "Suggestion: Keep the barbell close to your body throughout the lift.")
-    ]
-
+    
     var body: some View {
         ZStack {
             if isLoading {
-                // Loading view while data is being fetched
                 LoadingView()
                     .onAppear {
-                        checkDataStatus()
+                        loadData()
                     }
             } else {
-                // Main evaluation page view
                 ScrollView {
                     VStack(alignment: .leading) {
                         // Play button at the top
@@ -104,7 +91,7 @@ struct EvaluationPageView: View {
                                     Text(scoreText)
                                         .font(.system(size: 50))
                                         .fontWeight(.bold)
-                                        .padding(.top, 10) // Space between circle and score
+                                        .padding(.top, 10)
 
                                     Text(totalScoreText)
                                         .font(.title3)
@@ -172,109 +159,55 @@ struct EvaluationPageView: View {
                     }
                     .background(Color.white.edgesIgnoringSafeArea(.all))
                     .onAppear {
-                        // Start the sequence after data is received
                         startEvaluationSequence()
                     }
                 }
             }
         }
     }
-
-    // MARK: - Check Data Status
-
-    private func checkDataStatus() {
-        // Simulate checking data from the backend every 1 second
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            if dataReceived {
-                isLoading = false  // Stop loading when data is received
-                timer.invalidate()  // Stop the timer once data is available
-            } else {
-                // Simulate backend data reception (replace this with real data fetching logic)
-                // Here we simulate data reception after 5 seconds for demonstration purposes
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    self.dataReceived = true
-                }
-            }
-        }
-    }
-
-    // MARK: - Animation Functions
-
     private func startEvaluationSequence() {
-        typeWriterEffect(for: "Well Done!", target: $wellDoneText, perCharacterDelay: 0.01) {
-            // After 'Well Done!' appears
-            showLoadingBar = true
-            withAnimation(.easeInOut(duration: 2.0)) {
-                animationProgress = 0.65
-            }
-            // After loading bar animation completes
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                showScore = true
-                typeWriterEffect(for: "65", target: $scoreText, perCharacterDelay: 0.01) {
-                    typeWriterEffect(for: "/100", target: $totalScoreText, perCharacterDelay: 0.01) {
-                        showOverallEvaluation = true
-                        typeWriterEffect(for: "Overall Evaluation", target: $overallEvaluationText, perCharacterDelay: 0.01) {
-                            startEvaluationTextAnimation()
-                        }
-                    }
+        // Start by displaying the loading bar
+        showLoadingBar = true
+
+        // Simulate some delay to represent the evaluation process
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            // Show the score after a short delay
+            self.showScore = true
+            self.animationProgress = CGFloat(self.evaluationData.rating) / 100.0
+
+            // Update the evaluation index to display the evaluation points
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                self.showOverallEvaluation = true
+                self.evaluationTextIndex = self.evaluationData.overallEvaluation.count
+
+                // After another delay, show the next level improvements
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.showNextLevel = true
+                    self.nextLevelIssueIndex = self.evaluationData.potentialImprovement.count
                 }
             }
         }
     }
 
-    private func startEvaluationTextAnimation(at index: Int = 0) {
-        if index < evaluationTexts.count {
-            typeWriterEffect(for: evaluationTexts[index], target: $evaluationTextsArray[index], perCharacterDelay: 0.02) {
-                evaluationTextIndex = index + 1
-                startEvaluationTextAnimation(at: index + 1)
-            }
-        } else {
-            // All evaluation texts are done, proceed to 'Next Level'
-            showNextLevel = true
-            typeWriterEffect(for: "Next Level", target: $nextLevelText, perCharacterDelay: 0.01) {
-                startNextLevelIssuesAnimation()
-            }
+    
+    private func loadData() {
+        // Simulate loading data here
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            self.dataReceived = true
+            self.isLoading = false
+            self.populateData()
         }
     }
 
-    private func startNextLevelIssuesAnimation(at index: Int = 0) {
-        if index < nextLevelIssues.count {
-            let issue = nextLevelIssues[index].0
-            let suggestion = nextLevelIssues[index].1
-            typeWriterEffect(for: issue, target: Binding<String>(
-                get: { self.nextLevelIssuesArray[index].issue },
-                set: { self.nextLevelIssuesArray[index].issue = $0 }
-            ), perCharacterDelay: 0.02) {
-                typeWriterEffect(for: suggestion, target: Binding<String>(
-                    get: { self.nextLevelIssuesArray[index].suggestion },
-                    set: { self.nextLevelIssuesArray[index].suggestion = $0 }
-                ), perCharacterDelay: 0.02) {
-                    nextLevelIssueIndex = index + 1
-                    startNextLevelIssuesAnimation(at: index + 1)
-                }
-            }
-        }
+    private func populateData() {
+        scoreText = "\(evaluationData.rating)"
+        totalScoreText = "/100"
+        overallEvaluationText = "Overall Evaluation"
+        evaluationTextsArray = evaluationData.overallEvaluation
+        nextLevelIssuesArray = evaluationData.potentialImprovement.map { (issue: $0.problem, suggestion: $0.improvement) }
     }
 
-    // MARK: - Typewriter Effect Function
-
-    private func typeWriterEffect(for text: String, target: Binding<String>, delayBeforeStart: Double = 0.0, perCharacterDelay: Double, completion: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delayBeforeStart) {
-            target.wrappedValue = ""
-            var currentIndex = 0
-            let timer = Timer.scheduledTimer(withTimeInterval: perCharacterDelay, repeats: true) { timer in
-                if currentIndex < text.count {
-                    let index = text.index(text.startIndex, offsetBy: currentIndex)
-                    target.wrappedValue.append(text[index])
-                    currentIndex += 1
-                } else {
-                    timer.invalidate()
-                    completion()
-                }
-            }
-            RunLoop.current.add(timer, forMode: .common)
-        }
-    }
+    // Your existing animation functions can stay as they are, adjusted as needed to use the new data
 }
 
 // MARK: - Supporting Views
@@ -319,6 +252,14 @@ struct IssuePoint: View {
 
 struct EvaluationPageView_Previews: PreviewProvider {
     static var previews: some View {
-        EvaluationPageView()
+        EvaluationPageView(evaluationData: EvaluationData(
+            audio: "audio.mp3",
+            overallEvaluation: ["The person in the image appears to be slouching and not maintaining a neutral spine.", "There's a lack of engagement in the core muscles."],
+            potentialImprovement: [
+                EvaluationData.Improvement(problem: "Slouching Posture", improvement: "Sit upright with your shoulders relaxed and back straight. Engage your core muscles to support your spine."),
+                EvaluationData.Improvement(problem: "Lack of Core Engagement", improvement: "Actively engage your core by tightening your stomach muscles. This will help you maintain a neutral spine and improve posture.")
+            ],
+            rating: 50
+        ))
     }
 }

@@ -434,18 +434,43 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     }
 
 
-
+//    struct EvaluationData: Decodable {
+//        let audio: String
+//        let overallEvaluation: [String]
+//        let potentialImprovement: [Improvement]
+//        let rating: Int
+//
+//        struct Improvement: Decodable {
+//            let problem: String
+//            let improvement: String
+//        }
+//
+//        private enum CodingKeys: String, CodingKey {
+//            case audio
+//            case overallEvaluation = "overall_evaluation"
+//            case potentialImprovement = "potential_improvement"
+//            case rating
+//        }
+//    }
+    
     // MARK: - Helper Functions
     // Assuming this is in another file, like a ViewController
     func presentEvaluationPage(jsonData: Data) {
         DispatchQueue.main.async {
             // Dismiss the loading view before presenting the evaluation page
             self.loadingViewController?.dismiss(animated: true, completion: {
-                // Pass the JSON data to EvaluationPageView
-                let evaluationPageView = EvaluationPageView()
-                let hostingController = UIHostingController(rootView: evaluationPageView)
-                hostingController.modalPresentationStyle = .fullScreen
-                self.present(hostingController, animated: true, completion: nil)
+                // Decode JSON data
+                let decoder = JSONDecoder()
+                do {
+                    let evaluationData = try decoder.decode(EvaluationData.self, from: jsonData)
+                    // Pass the JSON data to EvaluationPageView
+                    let evaluationPageView = EvaluationPageView(evaluationData: evaluationData)
+                    let hostingController = UIHostingController(rootView: evaluationPageView)
+                    hostingController.modalPresentationStyle = .fullScreen
+                    self.present(hostingController, animated: true, completion: nil)
+                } catch {
+                    print("Failed to decode JSON: \(error)")
+                }
             })
         }
     }
