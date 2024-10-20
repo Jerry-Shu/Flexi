@@ -206,11 +206,10 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
                 let loadingView = LoadingView()
                 let hostingController = UIHostingController(rootView: loadingView)
                 hostingController.modalPresentationStyle = .fullScreen
-                self.present(hostingController, animated: true) {
-                    self.loadingViewController = hostingController
-                    // Start uploading after presenting the loading view
-                    self.uploadVideo(data: videoData)
-                }
+                self.present(hostingController, animated: true)
+                self.loadingViewController = hostingController
+                // Start uploading after presenting the loading view
+                self.uploadVideo(data: videoData)
             }
         } catch {
             print("Error converting video to Data: \(error.localizedDescription)")
@@ -227,12 +226,13 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.timeoutInterval = 120 // Extended timeout
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         var body = Data()
 
-        // Add 'file' field with correct Content-Type
+        // Build body
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"file\"; filename=\"video.mp4\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: video/mp4\r\n\r\n".data(using: .utf8)!)
@@ -240,10 +240,23 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         body.append("\r\n".data(using: .utf8)!)
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
 
-        // Create the upload task
-        let task = URLSession.shared.uploadTask(with: request, from: body) { (responseData, response, error) in
-            if let error = error {
+        // Print body size
+        print("Body size: \(body.count) bytes")
+
+        // Use a custom URLSession with extended timeout
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 120
+        config.timeoutIntervalForResource = 120
+        let session = URLSession(configuration: config)
+
+        let task = session.uploadTask(with: request, from: body) { (responseData, response, error) in
+            if let error = error as NSError? {
                 print("Error uploading video: \(error.localizedDescription)")
+                print("Error code: \(error.code)")
+                print("Error domain: \(error.domain)")
+                if let underlyingError = error.userInfo[NSUnderlyingErrorKey] as? NSError {
+                    print("Underlying error: \(underlyingError.localizedDescription)")
+                }
                 DispatchQueue.main.async {
                     self.showUploadError()
                 }
@@ -265,10 +278,14 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
                         self.showUploadError()
                     }
                 }
+            } else {
+                print("Invalid response received from the server.")
             }
         }
+
         task.resume()
     }
+
 
     // MARK: - Helper Functions
     func presentEvaluationPage() {
