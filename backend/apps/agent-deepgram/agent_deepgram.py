@@ -53,5 +53,5 @@ async def query_handler(ctx: Context, sender: str, _query: Text2AudioRequest):
         print(e)
         await ctx.send(sender, Text2AudioResponse(audio_path=""))
 
-deepgram_agent.include(summary_protocol, publish_manifest=True)
+# deepgram_agent.include(summary_protocol, publish_manifest=True)
 deepgram_agent.run()

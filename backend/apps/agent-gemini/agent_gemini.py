@@ -47,5 +47,5 @@ async def query_handler(ctx: Context, sender: str, _query: QueryRequest):
         print(e)
         await ctx.send(sender, QueryResponse(data={}, statusCode=900000, statusMessage="Internal Error"))
 
-agent.include(summary_protocol, publish_manifest=True)
+# agent.include(summary_protocol, publish_manifest=True)
 agent.run()

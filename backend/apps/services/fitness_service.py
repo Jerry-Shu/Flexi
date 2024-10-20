@@ -11,6 +11,7 @@
 -------------------------------------------------
 """
 import os.path
+import time
 
 import google.generativeai as genai
 from ..utils.util import video_to_webp, make_image_path
@@ -45,7 +46,10 @@ class FitnessService:
         webp_path = make_image_path(input_path)
         print("webp_path", webp_path)
 
-        # video_to_webp(input_path, webp_path)
+        start_time = time.time()
+        video_to_webp(input_path, webp_path)
+        end_time = time.time()
+        print("convert to webp: ", end_time - start_time)
 
         gemini_file = genai.upload_file(path=webp_path, display_name="webp")
         file = genai.get_file(name=gemini_file.name)
@@ -64,8 +68,6 @@ class FitnessService:
             model_name=self.model_id,
             system_instruction=system_instruction
         )
-
-
         # 构造 Prompt
         prompt = (
             "Evaluate the fitness movement in the provided file, give a rating of the movement out of 100, "
