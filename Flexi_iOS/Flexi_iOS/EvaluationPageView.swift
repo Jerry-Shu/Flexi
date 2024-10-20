@@ -1,9 +1,10 @@
 import SwiftUI
-
+import AVFoundation
 
 struct EvaluationPageView: View {
     let evaluationData: EvaluationData
 
+    @State private var audioPlayer: AVAudioPlayer?
     @State private var isLoading = true
     @State private var dataReceived = false
     @State private var animationProgress: CGFloat = 0.0
@@ -31,22 +32,22 @@ struct EvaluationPageView: View {
                     }
             } else {
                 ScrollView {
-                    VStack(alignment: .leading) {
-                        // Play button at the top
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // Add functionality here if needed
-                            }) {
-                                Image(systemName: "play.circle.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 50, height: 50)
-                                    .foregroundColor(.blue)
-                                    .padding(.top, 20)
-                                    .padding(.trailing, 20)
-                            }
-                        }
+                                   VStack(alignment: .leading) {
+                                       // Play button at the top
+                                       HStack {
+                                           Spacer()
+                                           Button(action: {
+                                               playAudio() // Call the playAudio function when the button is clicked
+                                           }) {
+                                               Image(systemName: "play.circle.fill")
+                                                   .resizable()
+                                                   .scaledToFit()
+                                                   .frame(width: 50, height: 50)
+                                                   .foregroundColor(.blue)
+                                                   .padding(.top, 20)
+                                                   .padding(.trailing, 20)
+                                           }
+                                       }
 
                         // Title
                         if !wellDoneText.isEmpty {
@@ -165,6 +166,21 @@ struct EvaluationPageView: View {
             }
         }
     }
+    func playAudio() {
+        guard let audioData = Data(base64Encoded: evaluationData.audio) else {
+            print("Failed to decode audio string")
+            return
+        }
+
+        do {
+            audioPlayer = try AVAudioPlayer(data: audioData)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to play audio: \(error.localizedDescription)")
+        }
+    }
+    
     private func startEvaluationSequence() {
         // Start by displaying the loading bar
         showLoadingBar = true
