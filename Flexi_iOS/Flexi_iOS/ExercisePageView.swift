@@ -194,7 +194,7 @@ struct Exercise: Identifiable {
 
 
 struct ExerciseDescriptionView: View {
-    let exercise: Exercise
+    let exercise: Exercise  // Make sure the type is Exercise
     @State private var showCamera = false
 
     var body: some View {
@@ -259,8 +259,8 @@ struct ExerciseDescriptionView: View {
             }
             .padding(.bottom, 30)
             .sheet(isPresented: $showCamera) {
-                CameraView { videoURL in
-                    uploadVideoToServer(videoURL: videoURL)
+                CameraView { videoData in
+                    uploadVideoToServer(videoData: videoData)
                 }
             }
         }
@@ -268,46 +268,56 @@ struct ExerciseDescriptionView: View {
         .frame(maxHeight: .infinity)
     }
 
-    func uploadVideoToServer(videoURL: URL) {
-        // Upload video to server
-        let serverURL = URL(string: "https://yourserver.com/upload")! // Replace with your server URL
+    func uploadVideoToServer(videoData: Data) {
+        // Ensure the server URL is correct
+        guard let serverURL = URL(string: "http://172.20.10.13:5656/api/upload") else {
+            print("Invalid server URL")
+            return
+        }
+        
+        print("gonna post")
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
+        
+        // Boundary string for multipart data
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
+        
         var data = Data()
 
-        // Append the video data
-        let filename = videoURL.lastPathComponent
+        // Append the video file to the data
+        let filename = "video.mp4"
         let mimetype = "video/quicktime"
-        let videoData = try! Data(contentsOf: videoURL)
 
+        // Add the multipart boundary and headers for the video file
         data.append("--\(boundary)\r\n".data(using: .utf8)!)
         data.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
         data.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
-        data.append(videoData)
+        data.append(videoData) // Video data
         data.append("\r\n".data(using: .utf8)!)
 
+        // Close the boundary
         data.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
+        
+        // Send the upload request
         let session = URLSession.shared
         session.uploadTask(with: request, from: data) { responseData, response, error in
             if let error = error {
-                print("Upload error: \(error.localizedDescription)")
+                print("Upload failed: \(error.localizedDescription)")
                 return
             }
-
-            if let response = response as? HTTPURLResponse {
-                print("Status code: \(response.statusCode)")
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Status code: \(httpResponse.statusCode)")
             }
-
+            
             if let responseData = responseData {
                 let responseString = String(data: responseData, encoding: .utf8)
                 print("Response data: \(responseString ?? "No response data")")
             }
         }.resume()
     }
+
 }
 
 struct ExercisePageView_Previews: PreviewProvider {

@@ -5,12 +5,16 @@ struct LoadingView: View {
         VStack {
             Spacer()
             ProgressView("Uploading...")
-                .progressViewStyle(CircularProgressViewStyle(tint: .yellow))
-                .scaleEffect(2.0)
-                .padding()
+                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                .scaleEffect(2)
             Spacer()
         }
-        .background(Color.black.opacity(0.7))
-        .edgesIgnoringSafeArea(.all)
+        .background(Color.white.edgesIgnoringSafeArea(.all))
+    }
+}
+
+struct LoadingView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoadingView()
     }
 }

@@ -3,12 +3,12 @@ import AVFoundation
 
 struct CameraView: UIViewControllerRepresentable {
     @Environment(\.presentationMode) var presentationMode
-    var onRecordingFinished: (URL) -> Void
+    var onRecordingFinished: (Data) -> Void
 
     func makeUIViewController(context: Context) -> CameraViewController {
         let controller = CameraViewController()
-        controller.onRecordingFinished = { url in
-            self.onRecordingFinished(url)
+        controller.onRecordingFinished = { data in
+            self.onRecordingFinished(data)
             self.presentationMode.wrappedValue.dismiss()
         }
         controller.onCancel = {

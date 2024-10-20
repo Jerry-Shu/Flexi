@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct EvaluationPageView: View {
-    @State private var isLoading = true  // Add a state to track loading
-    @State private var dataReceived = false  // Track whether data has been received
+    @State private var isLoading = true
+    @State private var dataReceived = false
     @State private var animationProgress: CGFloat = 0.0
     @State private var scoreText = ""
     @State private var totalScoreText = ""
@@ -25,7 +25,7 @@ struct EvaluationPageView: View {
         "The stance width seems appropriate for a conventional deadlift.",
         "There are significant form issues that need to be addressed for safety and effectiveness."
     ]
-    
+
     let nextLevelIssues = [
         ("Rounded back", "Suggestion: Keep your back straight by engaging your core and lats."),
         ("Improper hip hinge", "Suggestion: Practice hinging at the hips while keeping your back neutral."),
@@ -97,7 +97,7 @@ struct EvaluationPageView: View {
                             }
                             .padding(.top, 10)
                             .frame(maxWidth: .infinity, alignment: .center)
-                            
+
                             // Display Score below the circle
                             if showScore {
                                 HStack {
@@ -201,7 +201,7 @@ struct EvaluationPageView: View {
     // MARK: - Animation Functions
 
     private func startEvaluationSequence() {
-        typeWriterEffect(for: "Well Done!", target: $wellDoneText, perCharacterDelay: 0.01) {  // Faster
+        typeWriterEffect(for: "Well Done!", target: $wellDoneText, perCharacterDelay: 0.01) {
             // After 'Well Done!' appears
             showLoadingBar = true
             withAnimation(.easeInOut(duration: 2.0)) {
@@ -210,10 +210,10 @@ struct EvaluationPageView: View {
             // After loading bar animation completes
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 showScore = true
-                typeWriterEffect(for: "65", target: $scoreText, perCharacterDelay: 0.01) {  // Faster
-                    typeWriterEffect(for: "/100", target: $totalScoreText, perCharacterDelay: 0.01) {  // Faster
+                typeWriterEffect(for: "65", target: $scoreText, perCharacterDelay: 0.01) {
+                    typeWriterEffect(for: "/100", target: $totalScoreText, perCharacterDelay: 0.01) {
                         showOverallEvaluation = true
-                        typeWriterEffect(for: "Overall Evaluation", target: $overallEvaluationText, perCharacterDelay: 0.01) {  // Faster
+                        typeWriterEffect(for: "Overall Evaluation", target: $overallEvaluationText, perCharacterDelay: 0.01) {
                             startEvaluationTextAnimation()
                         }
                     }
@@ -224,14 +224,14 @@ struct EvaluationPageView: View {
 
     private func startEvaluationTextAnimation(at index: Int = 0) {
         if index < evaluationTexts.count {
-            typeWriterEffect(for: evaluationTexts[index], target: $evaluationTextsArray[index], perCharacterDelay: 0.02) {  // Faster
+            typeWriterEffect(for: evaluationTexts[index], target: $evaluationTextsArray[index], perCharacterDelay: 0.02) {
                 evaluationTextIndex = index + 1
                 startEvaluationTextAnimation(at: index + 1)
             }
         } else {
             // All evaluation texts are done, proceed to 'Next Level'
             showNextLevel = true
-            typeWriterEffect(for: "Next Level", target: $nextLevelText, perCharacterDelay: 0.01) {  // Faster
+            typeWriterEffect(for: "Next Level", target: $nextLevelText, perCharacterDelay: 0.01) {
                 startNextLevelIssuesAnimation()
             }
         }
@@ -244,11 +244,11 @@ struct EvaluationPageView: View {
             typeWriterEffect(for: issue, target: Binding<String>(
                 get: { self.nextLevelIssuesArray[index].issue },
                 set: { self.nextLevelIssuesArray[index].issue = $0 }
-            ), perCharacterDelay: 0.02) {  // Faster
+            ), perCharacterDelay: 0.02) {
                 typeWriterEffect(for: suggestion, target: Binding<String>(
                     get: { self.nextLevelIssuesArray[index].suggestion },
                     set: { self.nextLevelIssuesArray[index].suggestion = $0 }
-                ), perCharacterDelay: 0.02) {  // Faster
+                ), perCharacterDelay: 0.02) {
                     nextLevelIssueIndex = index + 1
                     startNextLevelIssuesAnimation(at: index + 1)
                 }

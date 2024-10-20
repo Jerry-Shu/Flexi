@@ -1,8 +1,9 @@
 import UIKit
 import AVFoundation
-import SwiftUI // Import SwiftUI for LoadingView and EvaluationPageView
+import SwiftUI
 
 class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
+    // MARK: - Properties
     var captureSession: AVCaptureSession!
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!
     var movieOutput = AVCaptureMovieFileOutput()
@@ -10,17 +11,18 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     var frontCamera: AVCaptureDevice?
     var backCamera: AVCaptureDevice?
     var isUsingFrontCamera = true
-    var onRecordingFinished: ((URL) -> Void)?
+    var onRecordingFinished: ((Data) -> Void)?
     var onCancel: (() -> Void)?
-
+    
     var countdownLabel: UILabel!
     var stopButton: UIButton!
     var flipCameraButton: UIButton!
-    var activityIndicator: UIActivityIndicatorView!
     var countdownTimer: Timer?
     var isRecording = false
-    var recordingTimer: Timer? // Timer to stop recording after 20 seconds
+    var recordingTimer: Timer?
+    var loadingViewController: UIViewController? // Reference to the loading view controller
 
+    // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCameras()
@@ -28,6 +30,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         startCountdownAndRecording()
     }
 
+    // MARK: - Camera Setup
     func setupCameras() {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .high
@@ -52,7 +55,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     func addCameraInput(camera: AVCaptureDevice) {
         do {
             let newInput = try AVCaptureDeviceInput(device: camera)
-            
+
             // Remove current input if available
             if let currentInput = currentCameraInput {
                 captureSession.beginConfiguration()
@@ -94,6 +97,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         }
     }
 
+    // MARK: - UI Setup
     func setupUI() {
         // Countdown Label
         countdownLabel = UILabel()
@@ -110,11 +114,11 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
 
         // Stop Button (3x larger)
         stopButton = UIButton(type: .system)
-        stopButton.setImage(UIImage(systemName: "record.circle"), for: .normal) // Red dot icon
+        stopButton.setImage(UIImage(systemName: "record.circle"), for: .normal)
         stopButton.tintColor = .red
         stopButton.translatesAutoresizingMaskIntoConstraints = false
         stopButton.addTarget(self, action: #selector(stopRecording), for: .touchUpInside)
-        stopButton.transform = CGAffineTransform(scaleX: 3.0, y: 3.0) // Make the button 3 times larger
+        stopButton.transform = CGAffineTransform(scaleX: 3.0, y: 3.0)
         view.addSubview(stopButton)
 
         NSLayoutConstraint.activate([
@@ -124,11 +128,11 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
 
         // Flip Camera Button (3x larger)
         flipCameraButton = UIButton(type: .system)
-        flipCameraButton.setImage(UIImage(systemName: "arrow.triangle.2.circlepath.camera"), for: .normal) // Flip camera icon
+        flipCameraButton.setImage(UIImage(systemName: "arrow.triangle.2.circlepath.camera"), for: .normal)
         flipCameraButton.tintColor = .white
         flipCameraButton.translatesAutoresizingMaskIntoConstraints = false
         flipCameraButton.addTarget(self, action: #selector(flipCamera), for: .touchUpInside)
-        flipCameraButton.transform = CGAffineTransform(scaleX: 3.0, y: 3.0) // Make the button 3 times larger
+        flipCameraButton.transform = CGAffineTransform(scaleX: 3.0, y: 3.0)
         view.addSubview(flipCameraButton)
 
         NSLayoutConstraint.activate([
@@ -137,6 +141,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         ])
     }
 
+    // MARK: - Recording Functions
     func startCountdownAndRecording() {
         countdownLabel.isHidden = false
         var countdown = 3
@@ -157,7 +162,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     }
 
     func startRecording() {
-        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("output.mov")
+        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("output.mp4")
         try? FileManager.default.removeItem(at: outputURL)
         movieOutput.startRecording(to: outputURL, recordingDelegate: self)
         isRecording = true
@@ -177,13 +182,115 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
             recordingTimer?.invalidate()
             recordingTimer = nil
 
-            // Show loading indicator while navigating to a new loading screen
-            let loadingView = LoadingView()
-            let hostingController = UIHostingController(rootView: loadingView)
-            hostingController.modalPresentationStyle = .fullScreen
-            self.present(hostingController, animated: true) {
-                self.uploadVideoToServerAfterStop() // Start uploading after presenting the loading screen
+            // Do not present the loading view here
+            // The loading view will be presented after recording finishes
+        }
+    }
+
+    // MARK: - AVCaptureFileOutputRecordingDelegate Method
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if let error = error {
+            print("Error recording video: \(error.localizedDescription)")
+            return
+        }
+
+        // Handle successful recording
+        print("Video successfully recorded to: \(outputFileURL)")
+
+        // Convert video to Data
+        do {
+            let videoData = try Data(contentsOf: outputFileURL)
+
+            // Present loading view and then start uploading
+            DispatchQueue.main.async {
+                let loadingView = LoadingView()
+                let hostingController = UIHostingController(rootView: loadingView)
+                hostingController.modalPresentationStyle = .fullScreen
+                self.present(hostingController, animated: true) {
+                    self.loadingViewController = hostingController
+                    // Start uploading after presenting the loading view
+                    self.uploadVideo(data: videoData)
+                }
             }
+        } catch {
+            print("Error converting video to Data: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Upload Function
+    func uploadVideo(data: Data) {
+        let urlString = "http://172.20.10.13:5656/api/upload"
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL: \(urlString)")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+
+        // Add 'file' field with correct Content-Type
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"video.mp4\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: video/mp4\r\n\r\n".data(using: .utf8)!)
+        body.append(data)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        // Create the upload task
+        let task = URLSession.shared.uploadTask(with: request, from: body) { (responseData, response, error) in
+            if let error = error {
+                print("Error uploading video: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.showUploadError()
+                }
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response status code: \(httpResponse.statusCode)")
+                if httpResponse.statusCode == 200 {
+                    // Upload successful
+                    print("Video uploaded successfully.")
+                    DispatchQueue.main.async {
+                        self.presentEvaluationPage()
+                    }
+                } else {
+                    // Handle server error
+                    print("Server error: \(httpResponse.statusCode)")
+                    DispatchQueue.main.async {
+                        self.showUploadError()
+                    }
+                }
+            }
+        }
+        task.resume()
+    }
+
+    // MARK: - Helper Functions
+    func presentEvaluationPage() {
+        DispatchQueue.main.async {
+            // Dismiss the loading view before presenting the evaluation page
+            self.loadingViewController?.dismiss(animated: true, completion: {
+                let evaluationPageView = EvaluationPageView()
+                let hostingController = UIHostingController(rootView: evaluationPageView)
+                hostingController.modalPresentationStyle = .fullScreen
+                self.present(hostingController, animated: true, completion: nil)
+            })
+        }
+    }
+
+    func showUploadError() {
+        DispatchQueue.main.async {
+            // Dismiss the loading view before presenting the alert
+            self.loadingViewController?.dismiss(animated: true, completion: {
+                let alert = UIAlertController(title: "Upload Failed", message: "Failed to upload the video. Please try again.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            })
         }
     }
 
@@ -205,100 +312,4 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
             }
         }
     }
-
-    func uploadVideoToServerAfterStop() {
-        if let outputURL = movieOutput.outputFileURL {
-            uploadVideoToServer(videoURL: outputURL)
-        }
-    }
-
-    // MARK: - AVCaptureFileOutputRecordingDelegate
-
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        if let error = error {
-            print("Error recording video: \(error)")
-        } else {
-            // Start uploading after the recording stops
-            uploadVideoToServer(videoURL: outputFileURL)
-        }
-    }
-
-    func uploadVideoToServer(videoURL: URL) {
-        // Prepare the URL
-        guard let url = URL(string: "http://172.20.10.13:5656/api/upload") else {
-            print("Invalid URL")
-            return
-        }
-
-        // Create the request
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-
-        let boundary = "Boundary-\(UUID().uuidString)"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
-        // Prepare the multipart/form-data body
-        let fullData = createBodyWithParameters(filePathKey: "file", paths: [videoURL.path], boundary: boundary)
-
-        request.httpBody = fullData
-
-        // Create the upload task
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            // Handle the response
-            if let error = error {
-                print("Upload failed with error: \(error.localizedDescription)")
-                return
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Invalid response")
-                return
-            }
-
-            if (200...299).contains(httpResponse.statusCode) {
-                // Success
-                DispatchQueue.main.async {
-                    // Navigate to EvaluationPageView when the upload is finished
-                    let evaluationView = EvaluationPageView()
-                    let hostingController = UIHostingController(rootView: evaluationView)
-                    hostingController.modalPresentationStyle = .fullScreen
-
-                    if let presentedVC = UIApplication.shared.windows.first?.rootViewController?.presentedViewController {
-                        presentedVC.present(hostingController, animated: true, completion: nil)
-                    } else {
-                        UIApplication.shared.windows.first?.rootViewController?.present(hostingController, animated: true, completion: nil)
-                    }
-                }
-            } else {
-                // Server returned an error
-                print("Server returned status code \(httpResponse.statusCode)")
-            }
-        }
-
-        // Start the upload
-        task.resume()
-    }
-
-    // Helper function to create the multipart/form-data body
-    func createBodyWithParameters(filePathKey: String?, paths: [String], boundary: String) -> Data {
-        var body = Data()
-
-        for path in paths {
-            let url = URL(fileURLWithPath: path)
-            let filename = url.lastPathComponent
-            guard let data = try? Data(contentsOf: url) else { continue }
-            let mimetype = "video/mp4"
-
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"\(filePathKey ?? "file")\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-            body.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
-            body.append(data)
-            body.append("\r\n".data(using: .utf8)!)
-        }
-
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
-        return body
-    }
-
 }
