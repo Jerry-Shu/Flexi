@@ -139,7 +139,7 @@ struct EvaluationPageView: View {
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
                                     .foregroundColor(.yellow)
-                                Text(nextLevelText)
+                                Text("Potential Improvement")
                                     .font(.headline)
                                     .fontWeight(.bold)
                             }
