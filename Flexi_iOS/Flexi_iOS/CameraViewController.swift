@@ -218,7 +218,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
 
     // MARK: - Upload Function
     func uploadVideo(data: Data) {
-        let urlString = "http://172.20.10.13:5656/api/upload"
+        let urlString = "http://172.20.10.4:5656/api/upload"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
             return
@@ -316,7 +316,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     }
 
     func evaluateVideo(with filePath: String) {
-        let urlString = "http://172.20.10.13:5656/api/evaluate"
+        let urlString = "http://172.20.10.4:5656/api/evaluate"
         guard let url = URL(string: urlString) else {
             print("Invalid URL: \(urlString)")
             DispatchQueue.main.async {
@@ -350,6 +350,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
         let session = URLSession(configuration: config)
 
         let task = session.dataTask(with: request) { (data, response, error) in
+            // Check if there was an error in the request
             if let error = error as NSError? {
                 print("Error evaluating video: \(error.localizedDescription)")
                 print("Error code: \(error.code)")
@@ -363,18 +364,59 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
                 return
             }
 
+            // Handle HTTP response
             if let httpResponse = response as? HTTPURLResponse {
                 print("Evaluation response status code: \(httpResponse.statusCode)")
+                
                 if httpResponse.statusCode == 200 {
-                    // Evaluation successful
-                    print("Video evaluated successfully.")
-                    // Handle the evaluation response as needed
-                    // For example, parse the response data and present the evaluation page
-                    DispatchQueue.main.async {
-                        self.presentEvaluationPage()
+                    // Check if data is received
+                    guard let responseData = data else {
+                        print("No data received during evaluation.")
+                        DispatchQueue.main.async {
+                            self.showUploadError()
+                        }
+                        return
+                    }
+                    
+                    // Parse the JSON response data
+                    do {
+                        // Assuming the server responds with JSON data containing the evaluation results
+                        let jsonResponse = try JSONSerialization.jsonObject(with: responseData, options: [])
+                        print("JSON Response: \(jsonResponse)")
+                        
+                        // Assuming jsonResponse is a valid JSON object that can be passed to presentEvaluationPage
+                        // Convert jsonResponse back to Data to pass to EvaluationPageView (optional based on your implementation)
+                        do {
+                            // Convert JSON object to Data
+                            let jsonData = try JSONSerialization.data(withJSONObject: jsonResponse, options: [])
+
+                            // Deserialize JSON data into a dictionary
+                            if let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
+                                
+                                // Access the "data" field from the dictionary
+                                if let dataField = jsonObject["data"] as? [String: Any] {
+                                    // Serialize the 'dataField' dictionary back to Data
+                                    let serializedData = try JSONSerialization.data(withJSONObject: dataField, options: [])
+                                    
+                                    // Pass the serialized Data to presentEvaluationPage
+                                    DispatchQueue.main.async {
+                                        self.presentEvaluationPage(jsonData: serializedData)
+                                    }
+                                } else {
+                                    print("No 'data' field found in the JSON object.")
+                                }
+                            }
+                        } catch {
+                            print("Error serializing or deserializing JSON: \(error)")
+                        }
+                    } catch {
+                        print("Error parsing response data: \(error.localizedDescription)")
+                        DispatchQueue.main.async {
+                            self.showUploadError()
+                        }
                     }
                 } else {
-                    // Handle server error
+                    // Handle server error (e.g., 400, 500, etc.)
                     print("Server error during evaluation: \(httpResponse.statusCode)")
                     DispatchQueue.main.async {
                         self.showUploadError()
@@ -392,18 +434,25 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
     }
 
 
+
     // MARK: - Helper Functions
-    func presentEvaluationPage() {
+    // Assuming this is in another file, like a ViewController
+    func presentEvaluationPage(jsonData: Data) {
         DispatchQueue.main.async {
             // Dismiss the loading view before presenting the evaluation page
             self.loadingViewController?.dismiss(animated: true, completion: {
-                let evaluationPageView = EvaluationPageView()
+                // Pass the JSON data to EvaluationPageView
+                let evaluationPageView = EvaluationPageView(jsonData: jsonData)
                 let hostingController = UIHostingController(rootView: evaluationPageView)
                 hostingController.modalPresentationStyle = .fullScreen
                 self.present(hostingController, animated: true, completion: nil)
             })
         }
     }
+
+
+    
+
 
     func showUploadError() {
         DispatchQueue.main.async {
