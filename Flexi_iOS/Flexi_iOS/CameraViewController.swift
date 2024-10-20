@@ -442,7 +442,7 @@ class CameraViewController: UIViewController, AVCaptureFileOutputRecordingDelega
             // Dismiss the loading view before presenting the evaluation page
             self.loadingViewController?.dismiss(animated: true, completion: {
                 // Pass the JSON data to EvaluationPageView
-                let evaluationPageView = EvaluationPageView(jsonData: jsonData)
+                let evaluationPageView = EvaluationPageView()
                 let hostingController = UIHostingController(rootView: evaluationPageView)
                 hostingController.modalPresentationStyle = .fullScreen
                 self.present(hostingController, animated: true, completion: nil)
